@@ -1,0 +1,19 @@
+# Private data folders
+semanas/
+voos/
+
+# Local configuration (private data)
+config_local.R
+
+# RStudio files
+.Rproj.user/
+.Rhistory
+.RData
+.Ruserdata
+
+# R Environment
+.Renviron
+.Rprofile
+
+# Session Data
+*.Rdata
