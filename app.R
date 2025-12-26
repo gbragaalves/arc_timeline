@@ -22,6 +22,13 @@ library(zip)
 # ---- Configurações locais (dados privados) ----
 source("config_local.R", local = FALSE)
 
+# Configuração de pessoas para Location History (se existir)
+if (file.exists("R/config_pessoas.R")) {
+  source("R/config_pessoas.R", local = FALSE)
+} else {
+  PESSOAS_CONFIG <- list()
+}
+
 # ---- Carregar módulos ----
 # Ordem importante: módulos base primeiro, depois os que dependem deles
 

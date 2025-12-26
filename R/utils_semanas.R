@@ -1,5 +1,56 @@
 # ---- Helpers: semanas + samples_apagar + overlap ----
 
+# Carrega samples existentes de um intervalo de tempo dos arquivos semanais
+carregar_samples_intervalo <- function(inicio_utc, fim_utc, semana_dir = SEMANA_DIR) {
+  if (is.null(inicio_utc) || is.null(fim_utc) || is.na(inicio_utc) || is.na(fim_utc)) {
+    return(list())
+  }
+  if (inicio_utc > fim_utc) return(list())
+
+  # Identifica semanas envolvidas
+  semanas <- semanas_para_intervalo(inicio_utc, fim_utc)
+  if (length(semanas) == 0) return(list())
+
+  samples_encontrados <- list()
+
+  for (sem in semanas) {
+    gz_path <- file.path(semana_dir, paste0(sem, ".json.gz"))
+    if (!file.exists(gz_path)) next
+
+    semana_samples <- tryCatch(
+      jsonlite::fromJSON(gzfile(gz_path), simplifyVector = FALSE),
+      error = function(e) NULL
+    )
+    if (is.null(semana_samples) || length(semana_samples) == 0) next
+
+    for (s in semana_samples) {
+      date_str <- s$date
+      if (is.null(date_str)) next
+
+      ts <- tryCatch(
+        as.POSIXct(date_str, format = "%Y-%m-%dT%H:%M:%SZ", tz = "UTC"),
+        error = function(e) NULL
+      )
+      if (is.null(ts) || is.na(ts)) next
+
+      # Filtra pelo intervalo
+      if (ts >= inicio_utc && ts <= fim_utc) {
+        samples_encontrados[[length(samples_encontrados) + 1L]] <- s
+      }
+    }
+  }
+
+  # Ordena por timestamp
+  if (length(samples_encontrados) > 0) {
+    ts_vec <- vapply(samples_encontrados, function(s) {
+      as.numeric(as.POSIXct(s$date, format = "%Y-%m-%dT%H:%M:%SZ", tz = "UTC"))
+    }, numeric(1))
+    samples_encontrados <- samples_encontrados[order(ts_vec)]
+  }
+
+  samples_encontrados
+}
+
 # Dado um intervalo [ini_utc, fim_utc], gera nomes de arquivos semanais envolvidos
 semanas_para_intervalo <- function(ini_utc, fim_utc) {
   if (ini_utc > fim_utc) return(character(0))
@@ -89,4 +140,38 @@ has_overlap <- function(timeline_items, inicio_utc, fim_utc, ignore_id = NULL) {
     # overlap se intervalos realmente se cruzam (bordas encostando é OK)
     (inicio_utc < ex_fim[1]) && (fim_utc > ex_ini[1])
   }, logical(1)))
+}
+
+# Carrega TODOS os samples de um timelineItemId específico
+carregar_samples_por_timeline_item <- function(timeline_item_id, semana_dir = SEMANA_DIR) {
+  if (is.null(timeline_item_id) || !nzchar(timeline_item_id)) return(list())
+
+  # Lista todas as semanas disponíveis
+  arquivos <- list.files(semana_dir, pattern = "\\.json\\.gz$", full.names = TRUE)
+
+  samples_encontrados <- list()
+
+  for (gz_path in arquivos) {
+    semana_samples <- tryCatch(
+      jsonlite::fromJSON(gzfile(gz_path), simplifyVector = FALSE),
+      error = function(e) NULL
+    )
+    if (is.null(semana_samples) || length(semana_samples) == 0) next
+
+    for (s in semana_samples) {
+      if (!is.null(s$timelineItemId) && s$timelineItemId == timeline_item_id) {
+        samples_encontrados[[length(samples_encontrados) + 1L]] <- s
+      }
+    }
+  }
+
+  # Ordena por timestamp
+  if (length(samples_encontrados) > 0) {
+    ts_vec <- vapply(samples_encontrados, function(s) {
+      as.numeric(as.POSIXct(s$date, format = "%Y-%m-%dT%H:%M:%SZ", tz = "UTC"))
+    }, numeric(1))
+    samples_encontrados <- samples_encontrados[order(ts_vec)]
+  }
+
+  samples_encontrados
 }

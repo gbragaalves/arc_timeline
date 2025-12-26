@@ -19,7 +19,7 @@ criar_locomotion_samples <- function(coords,
 
   if (is.null(altitude)) altitude <- rep(NA_real_, n)
   if (is.null(speed))    speed    <- rep(NA_real_, n)
-  if (is.null(heading))  heading  <- rep(NA_real_, n)
+  if (is.null(heading))  heading  <- calcular_bearings(coords)
 
   # Timezone por ponto (ou único para todos)
   if (force_single_tz) {

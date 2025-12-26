@@ -1,9 +1,14 @@
 # Private data folders
 semanas/
 voos/
+import/
+arquivos/
+location_history/
+location_history/cache/
 
 # Local configuration (private data)
 config_local.R
+R/config_pessoas.R
 
 # RStudio files
 .Rproj.user/
@@ -17,3 +22,6 @@ config_local.R
 
 # Session Data
 *.Rdata
+
+# Data files
+*.gpx

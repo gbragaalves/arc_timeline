@@ -67,7 +67,8 @@ exportar_arc_json <- function(timeline_items, samples, output_dir, data_trabalho
       arc_item,
       ti_path,
       auto_unbox = TRUE,
-      pretty     = TRUE
+      pretty     = TRUE,
+      digits     = NA
     )
 
     # amarra os samples referenciados a este item
@@ -87,7 +88,8 @@ exportar_arc_json <- function(timeline_items, samples, output_dir, data_trabalho
     samples,
     ls_path,
     auto_unbox = TRUE,
-    pretty     = TRUE
+    pretty     = TRUE,
+    digits     = NA
   )
 
   # ---- Samples a apagar (baseado nos arquivos semanais) ----
@@ -100,7 +102,8 @@ exportar_arc_json <- function(timeline_items, samples, output_dir, data_trabalho
       apagar,
       apagar_path,
       auto_unbox = TRUE,
-      pretty     = TRUE
+      pretty     = TRUE,
+      digits     = NA
     )
     message("samples_apagar.json criado com ", length(apagar), " samples para deletar")
   } else {
